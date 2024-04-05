@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLazyQuery, gql } from '@apollo/client';
 import { Button } from '@mui/material';
 
@@ -14,10 +14,28 @@ query ExampleQuery($input: GetEventsInput) {
   }
 `
 
-export const FetchButton = () => {
-    const [getEvents, { loading, error, data }] = useLazyQuery(GET_EVENTS,{ variables: {  "input": {
-        "venueSlug": "30-90"
-      }}});
+const GET_EVENTS_BY_DATE = gql`
+query GetEventsByDate($dateRange: DateRangeInput) {
+  eventsByVenue(dateRange: $dateRange) {
+    count
+    name
+  }
+}
+`
+
+export const FetchButton = ({ setData }) => {
+    const [getEvents, { loading, error, data }] = useLazyQuery(GET_EVENTS_BY_DATE,{ variables: {
+      "dateRange": {
+        "start": "2022-01-01",
+        "end": "2022-02-01"
+      },
+    }});
+
+      useEffect(() => {
+        if(data){
+          setData(data.eventsByVenue.slice(0,10));
+        }
+      },[data])
     return (
         <>
         <Button variant='contained' onClick={getEvents}>Hello</Button>
