@@ -38,9 +38,11 @@ export const FetchButton = ({ setData }) => {
       },[data])
     return (
         <>
-        <Button variant='contained' onClick={getEvents}>Hello</Button>
-        {loading ? 'loading...' : 'loaded!'}
-        <pre>{data ? JSON.stringify(data) : 'no data'}</pre>
+          <Button variant='contained' onClick={getEvents}>Get event count</Button>
+          {/* {loading ? 'loading...' : 'loaded!'} */}
+          {data && data.eventsByVenue.slice(0,10).map((item) => {
+            return <pre>{JSON.stringify(item)}</pre>
+          })}
         </>
     )
 }

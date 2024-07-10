@@ -1,17 +1,21 @@
-import { Container } from "@mui/material";
 import { ApolloClientProvider } from "./ApolloWrapper";
-import Barchart from "./Barchart";
-import { FetchButton } from "./FetchButton";
-import { useState } from "react";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
+import EventsTable from "./pages/EventsTable";
+import VenuesTable from "./pages/VenuesTable";
 
 function App() {
-  const [data, setData] = useState([]);
   return (
     <ApolloClientProvider>
-      <Container maxWidth="sm">
-        <Barchart data={data} />
-        <FetchButton setData={setData} />
-      </Container>
+      <BrowserRouter>
+        <Routes>
+          {/* <Route path="/barchart">
+            <Barchart data={data} />
+            <FetchButton setData={setData} />
+          </Route> */}
+          <Route path="/events-table" element={<EventsTable />} />
+          <Route path="/venues-table" element={<VenuesTable />} />
+        </Routes>
+      </BrowserRouter>
     </ApolloClientProvider>
   );
 }
