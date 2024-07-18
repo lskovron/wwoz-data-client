@@ -35,14 +35,33 @@ export const GET_VENUES_IN_RANGE = gql`
 export const GET_VENUE_DATA = gql`
   query Query($slug: String!) {
     venueGeoData(slug: $slug) {
-      slug
-      name
+      googleName
+      address
       lat
       lng
-      address
       types
       rating
       googleId
+      businessStatus
+      name
+      slug
+    }
+  }
+`;
+
+export const GET_VENUE_DATA_BY_NAME = gql`
+  query Query($name: String!, $slug: String!) {
+    venueGeoData(name: $name, slug: $slug) {
+      googleName
+      address
+      lat
+      lng
+      types
+      rating
+      googleId
+      businessStatus
+      name
+      slug
     }
   }
 `;

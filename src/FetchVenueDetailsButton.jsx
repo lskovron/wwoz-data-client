@@ -1,16 +1,19 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   Button,
   CircularProgress,
   Dialog,
   Grid,
+  Link,
+  TextField,
   Typography,
 } from "@mui/material";
 import { VenueMap } from "./VenueMap";
 import {
   GET_VENUES_IN_RANGE,
   GET_VENUE_DATA,
+  GET_VENUE_DATA_BY_NAME,
   SAVE_VENUE_DATA,
 } from "./graphql/queries";
 import { getVenuesVariables } from "./pages/VenuesTable";
@@ -19,12 +22,22 @@ export const FetchVenueDetailsButton = ({ slug, hasDetails }) => {
   const [results, setResults] = useState([]);
   const [resultIndex, setResultIndex] = useState(0);
   const [openModal, setOpenModal] = useState(false);
+  const [name, setName] = useState("");
 
   const [getData, { loading: isFetchingData }] = useLazyQuery(GET_VENUE_DATA, {
     variables: {
-      slug: slug,
+      slug,
     },
   });
+  const [getDataByName, { loading: isFetchingDataByName }] = useLazyQuery(
+    GET_VENUE_DATA_BY_NAME,
+    {
+      variables: {
+        name,
+        slug,
+      },
+    }
+  );
 
   const count = useMemo(() => results.length, [results]);
   const currentResult = useMemo(
@@ -33,9 +46,9 @@ export const FetchVenueDetailsButton = ({ slug, hasDetails }) => {
   );
 
   const venueDetails = useMemo(() => {
-    const { address, lat, lng, slug, name, googleId, rating } =
+    const { address, lat, lng, slug, name, googleId, rating, businessStatus } =
       currentResult || {};
-    return { address, lat, lng, slug, name, googleId, rating };
+    return { address, lat, lng, slug, name, googleId, rating, businessStatus };
   }, [currentResult]);
 
   const [saveNewVenue, { loading: isSavingVenue }] = useMutation(
@@ -56,6 +69,7 @@ export const FetchVenueDetailsButton = ({ slug, hasDetails }) => {
     await getData().then(({ data }) => {
       if (data?.venueGeoData?.length) {
         setResults(data.venueGeoData);
+        setName(data.venueGeoData[0].name);
         setOpenModal(true);
       }
     });
@@ -79,6 +93,16 @@ export const FetchVenueDetailsButton = ({ slug, hasDetails }) => {
       return prev + 1;
     });
   }, [count]);
+
+  const handleRetry = async () => {
+    await getDataByName().then(({ data }) => {
+      if (data?.venueGeoData?.length) {
+        setResults(data.venueGeoData);
+      }
+    });
+  };
+
+  useEffect(() => setResultIndex(0), [results]);
 
   const buttonProps = useMemo(() => {
     if (isFetchingData)
@@ -127,9 +151,18 @@ export const FetchVenueDetailsButton = ({ slug, hasDetails }) => {
         {buttonProps.label}
       </Button>
       <Dialog open={openModal}>
-        <Grid container padding={2}>
+        <Grid container padding={2} direction="column">
           <Typography>
-            Showing result {resultIndex + 1} of {results.length}
+            Showing result {resultIndex + 1} of {results.length}:{" "}
+            <strong>{slug}</strong>(
+            <Link
+              href={`https://wwoz.org/organizations/${slug}`}
+              target="_blank"
+            >
+              {" "}
+              WWOZ
+            </Link>
+            )
           </Typography>
           {count > 1 && (
             <Grid container>
@@ -152,6 +185,33 @@ export const FetchVenueDetailsButton = ({ slug, hasDetails }) => {
             <Grid item>
               <Button variant="outlined" onClick={() => setOpenModal(false)}>
                 Cancel
+              </Button>
+            </Grid>
+          </Grid>
+          <hr />
+          <Grid container spacing={1}>
+            <Grid item>
+              <TextField
+                fullWidth
+                size="small"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                onClick={handleRetry}
+                disabled={isFetchingDataByName}
+              >
+                {isFetchingDataByName && (
+                  <CircularProgress
+                    size={12}
+                    color="inherit"
+                    style={{ marginRight: 5 }}
+                  />
+                )}
+                Retry
               </Button>
             </Grid>
           </Grid>
