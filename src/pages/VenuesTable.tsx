@@ -58,8 +58,8 @@ type Response = {
 
 export const getVenuesVariables = {
   dateRange: {
-    start: "2022-01-01",
-    end: "2022-03-31",
+    start: "2015-01-01",
+    end: "2015-12-31",
   },
   limit: 100,
 };

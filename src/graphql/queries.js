@@ -73,3 +73,20 @@ export const SAVE_VENUE_DATA = gql`
     }
   }
 `;
+
+export const GET_FULL_HISTORY = gql`
+  query GetHistory {
+    fullHistory {
+      hasError
+      dateString
+    }
+  }
+`;
+export const GET_HISTORY = gql`
+  query History($dateRange: DateRangeInput!) {
+    history(dateRange: $dateRange) {
+      dateString
+      hasError
+    }
+  }
+`;
